@@ -46,3 +46,27 @@ if __name__ == '__main__':
     neptune_cluster_id = 'your-neptune-cluster-id'
     wait_for_neptune_reset(neptune_cluster_id)
     print('Exiting cleanly.')
+
+
+
+import requests
+
+def check_neptune_status(endpoint_url):
+    try:
+        response = requests.get(endpoint_url)
+        if response.status_code == 200:
+            return response.json()['status']
+        else:
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error occurred: {e}")
+        return None
+
+if __name__ == '__main__':
+    neptune_endpoint = 'your-neptune-endpoint-url'
+    status = check_neptune_status(neptune_endpoint)
+    if status is not None:
+        print(f"Neptune DB status: {status}")
+    else:
+        print("Failed to retrieve Neptune DB status.")
+
