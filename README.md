@@ -17,3 +17,32 @@ Deploy the API: Once you have configured the API Gateway, deploy it to generate 
 Test the API: Use a tool like cURL, Postman, or a web browser to send requests to the API's endpoint and verify that the data from the Neptune database is returned correctly.
 
 Remember to handle error cases, secure your API endpoints, and consider implementing authentication and authorization mechanisms, depending on your specific requirements.
+
+
+
+import time
+import boto3
+
+def check_neptune_status(cluster_id):
+    client = boto3.client('neptune')
+    response = client.describe_db_clusters(DBClusterIdentifier=cluster_id)
+    status = response['DBClusters'][0]['Status']
+    return status
+
+def wait_for_neptune_reset(cluster_id):
+    while True:
+        status = check_neptune_status(cluster_id)
+        if status == 'resetting' or status == 'backing-up':
+            print('Neptune DB reset in progress. Waiting...')
+            time.sleep(30)  # Adjust the sleep duration as needed
+        elif status == 'available':
+            print('Neptune DB reset completed successfully.')
+            break
+        else:
+            print(f'Unexpected status: {status}. Exiting...')
+            return
+
+if __name__ == '__main__':
+    neptune_cluster_id = 'your-neptune-cluster-id'
+    wait_for_neptune_reset(neptune_cluster_id)
+    print('Exiting cleanly.')
